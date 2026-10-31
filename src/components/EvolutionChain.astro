@@ -1,0 +1,105 @@
+---
+import { pokemonById, moveById, number } from '../utils/data'
+import type { Pokemon } from '../utils/data'
+
+interface Props {
+  entry: Pokemon
+}
+
+const { entry } = Astro.props
+let root = entry
+const visited = new Set<number>()
+while (root.evolvedFrom && pokemonById.has(root.evolvedFrom) && !visited.has(root.id)) {
+  visited.add(root.id)
+  root = pokemonById.get(root.evolvedFrom)!
+}
+
+type ChainNode = {
+  id: number
+  condition: Pokemon['evolutions'][number]['condition'] | null
+}
+
+const chainStages: ChainNode[][] = []
+let currentStage: ChainNode[] = [{ id: root.id, condition: null }]
+while (currentStage.length) {
+  chainStages.push(currentStage)
+  currentStage = currentStage.flatMap((node) => {
+    const pokemon = pokemonById.get(node.id)
+    return pokemon?.evolutions.map((evolution) => ({ id: evolution.id, condition: evolution.condition })) ?? []
+  })
+}
+
+function formatCondition(condition: ChainNode['condition']) {
+  if (!condition) return ''
+  if (condition.trigger === 'use-item') return `使用${condition.item?.name ?? '道具'}`
+  if (condition.trigger === 'shed') return '队伍有空位，且备有精灵球'
+
+  const parts: string[] = []
+  if (condition.trigger === 'trade') {
+    parts.push(condition.tradeSpeciesId
+      ? `与${pokemonById.get(condition.tradeSpeciesId)?.names.zh ?? '特定宝可梦'}交换`
+      : '通信交换')
+  }
+  if (condition.level !== null) parts.push(`等级 ${condition.level}`)
+  if (condition.gender !== null) parts.push(condition.gender === 1 ? '雌性' : '雄性')
+  if (condition.happiness !== null) parts.push(`亲密度达到 ${condition.happiness}`)
+  if (condition.beauty !== null) parts.push(`美丽度达到 ${condition.beauty}`)
+  if (condition.affection !== null) parts.push(`友好度达到 ${condition.affection}`)
+  if (condition.location) parts.push(condition.location.name)
+  if (condition.heldItem) parts.push(`携带${condition.heldItem.name}`)
+  if (condition.timeOfDay) parts.push({ day: '白天', night: '夜晚' }[condition.timeOfDay] ?? condition.timeOfDay)
+  if (condition.knownMoveId) parts.push(`学会${moveById.get(condition.knownMoveId)?.names.zh ?? '特定招式'}`)
+  const knownMoveType = condition.knownMoveType as { name: string } | null
+  if (knownMoveType) parts.push(`学会${knownMoveType.name}属性招式`)
+  if (condition.relativePhysicalStats !== null) {
+    const labels: Record<string, string> = { '1': '攻击＞防御', '0': '攻击＝防御', '-1': '攻击＜防御' }
+    parts.push(labels[String(condition.relativePhysicalStats)] ?? '攻防条件')
+  }
+  if (condition.partySpeciesId) parts.push(`队伍中有${pokemonById.get(condition.partySpeciesId)?.names.zh ?? '特定宝可梦'}`)
+  const partyType = condition.partyType as { name: string } | null
+  if (partyType) parts.push(`队伍中有${partyType.name}属性宝可梦`)
+  if (condition.trigger === 'level-up' && condition.level === null) parts.push('升级')
+  return parts.join(' · ')
+}
+---
+
+{chainStages.length > 1 ? (
+  <div class="evolution-chain">
+    {chainStages.map((stage, stageIndex) => (
+      <>
+        <div class="evolution-stage">
+          {stage.map((node) => {
+            const pokemon = pokemonById.get(node.id)!
+            return (
+              <div class="evolution-node">
+                {node.condition && <span class="evolution-condition">{formatCondition(node.condition)}</span>}
+                <a class:list={['evolution-pokemon', { current: node.id === entry.id }]} href={`/data/pokedex/${number(node.id)}`}>
+                  <img src={`/images/pokemon/${number(node.id)}.webp`} alt={pokemon.names.zh} width="72" height="72" loading="lazy" />
+                  <strong>{pokemon.names.zh}</strong>
+                  <span>#{number(node.id)}</span>
+                </a>
+              </div>
+            )
+          })}
+        </div>
+        {stageIndex < chainStages.length - 1 && <span class="evolution-arrow" aria-hidden="true">→</span>}
+      </>
+    ))}
+  </div>
+) : <p class="no-evolution">该宝可梦没有进化关系。</p>}
+
+<style>
+  .evolution-chain { display: flex; overflow-x: auto; align-items: center; gap: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); padding: 20px; }
+  .evolution-stage { display: grid; flex: 1 1 0; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); align-items: start; gap: 18px; }
+  .evolution-stage:first-child { display: block; flex: 0 0 140px; }
+  .evolution-node { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .evolution-condition { max-width: 190px; color: var(--muted); font-size: 11px; line-height: 1.5; text-align: center; }
+  .evolution-pokemon { display: flex; min-width: 112px; flex-direction: column; align-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 8px 12px; color: var(--text); text-decoration: none; }
+  .evolution-pokemon:hover, .evolution-pokemon.current { border-color: var(--gold); }
+  .evolution-pokemon.current { box-shadow: 0 0 0 2px var(--gold-soft); }
+  .evolution-pokemon img { width: 72px; height: 72px; object-fit: contain; image-rendering: pixelated; }
+  .evolution-pokemon span { color: var(--muted); font-size: 11px; }
+  .evolution-arrow { flex: 0 0 auto; color: var(--muted); font-size: 22px; }
+  .no-evolution { border: 1px dashed var(--line-strong); border-radius: 12px; padding: 20px; color: var(--muted); text-align: center; }
+  @media (max-width: 640px) { .evolution-chain { gap: 10px; padding: 14px; } .evolution-pokemon { min-width: 96px; padding: 8px; } }
+</style>

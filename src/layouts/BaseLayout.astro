@@ -1,0 +1,72 @@
+---
+import SiteHeader from '../components/SiteHeader.astro'
+import SiteFooter from '../components/SiteFooter.astro'
+import SearchDialog from '../components/SearchDialog.astro'
+import TableOfContents from '../components/TableOfContents.astro'
+import '../styles/global.css'
+
+interface Heading {
+  depth: number
+  slug: string
+  text: string
+}
+
+interface Props {
+  title?: string
+  description?: string
+  guide?: boolean
+  wide?: boolean
+  headings?: Heading[]
+  home?: boolean
+}
+
+const {
+  title = '心金·魂银攻略站',
+  description = '宝可梦 心金·魂银（HeartGold / SoulSilver）中文攻略与资料站',
+  guide = false,
+  wide = false,
+  headings = [],
+  home = false
+} = Astro.props
+const pageTitle = home ? `${title}｜宝可梦中文流程攻略与资料` : `${title}｜心金·魂银攻略站`
+const currentPath = Astro.url.pathname
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f7f5ef" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem('hgss-theme')
+        const dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      })()
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳转到正文</a>
+    <SiteHeader currentPath={currentPath} />
+    <slot name="hero" />
+    {guide ? (
+      <div class="guide-shell">
+        <main id="main-content" class="document-main">
+          <TableOfContents headings={headings} mobile />
+          <slot />
+        </main>
+        <TableOfContents headings={headings} />
+      </div>
+    ) : (
+      <main id="main-content" class:list={['page-main', { wide, 'home-main': home }]}>
+        <slot />
+      </main>
+    )}
+    <SiteFooter />
+    <SearchDialog />
+  </body>
+</html>

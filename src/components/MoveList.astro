@@ -1,0 +1,131 @@
+---
+import { moveData, number, value } from '../utils/data'
+import TypeBadge from './TypeBadge.astro'
+import MoveClassBadge from './MoveClassBadge.astro'
+
+const typeOrder = ['normal', 'fire', 'water', 'grass', 'electric', 'ice', 'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'unknown']
+const types = [...new Map(moveData.moves.map((entry) => [entry.type.slug, entry.type.name])).entries()]
+  .map(([slug, name]) => ({ slug, name }))
+  .sort((a, b) => typeOrder.indexOf(a.slug) - typeOrder.indexOf(b.slug))
+---
+
+<section class="move-browser" aria-label="招式资料查询">
+  <div class="filters">
+    <label class="move-search">
+      <span>招式名称</span>
+      <input id="move-query" type="search" placeholder="中文、日文、英文或编号" autocomplete="off" />
+    </label>
+    <label>
+      <span>属性</span>
+      <select id="move-type">
+        <option value="">全部属性</option>
+        {types.map((type) => <option value={type.slug}>{type.name}</option>)}
+      </select>
+    </label>
+    <label>
+      <span>分类</span>
+      <select id="move-class">
+        <option value="">全部分类</option>
+        <option value="physical">物理</option>
+        <option value="special">特殊</option>
+        <option value="status">变化</option>
+      </select>
+    </label>
+    <button class="reset-button" type="button" disabled>重置</button>
+  </div>
+
+  <p class="result-count" aria-live="polite">找到 <strong>{moveData.count}</strong> 个招式</p>
+
+  <div class="move-table-wrap">
+    <table class="move-table">
+      <thead>
+        <tr><th>编号</th><th>招式名称</th><th>属性</th><th>分类</th><th>威力</th><th>命中</th><th>PP</th><th>优先度</th><th>学习机器</th></tr>
+      </thead>
+      <tbody>
+        {moveData.moves.map((entry) => (
+          <tr
+            data-move-row
+            data-type={entry.type.slug}
+            data-class={entry.damageClass.slug}
+            data-search={`${entry.id} ${number(entry.id)} ${entry.slug} ${Object.values(entry.names).join(' ')}`.toLowerCase()}
+          >
+            <td class="move-number">#{number(entry.id)}</td>
+            <td class="move-name"><a href={`/data/moves/${number(entry.id)}`}>{entry.names.zh}</a><span>{entry.names.en}</span></td>
+            <td><TypeBadge slug={entry.type.slug} name={entry.type.name} /></td>
+            <td><MoveClassBadge slug={entry.damageClass.slug} name={entry.damageClass.name} /></td>
+            <td class="numeric">{value(entry.power)}</td>
+            <td class="numeric">{value(entry.accuracy, '%')}</td>
+            <td class="numeric">{value(entry.pp)}</td>
+            <td class="numeric">{entry.priority > 0 ? `+${entry.priority}` : entry.priority}</td>
+            <td class="machine">{entry.machine ?? '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="empty-result" hidden>没有符合条件的招式，请调整筛选条件。</p>
+</section>
+
+<script>
+  const query = document.querySelector<HTMLInputElement>('#move-query')
+  const type = document.querySelector<HTMLSelectElement>('#move-type')
+  const damageClass = document.querySelector<HTMLSelectElement>('#move-class')
+  const reset = document.querySelector<HTMLButtonElement>('.move-browser .reset-button')
+  const rows = [...document.querySelectorAll<HTMLTableRowElement>('[data-move-row]')]
+  const count = document.querySelector<HTMLElement>('.move-browser .result-count strong')
+  const empty = document.querySelector<HTMLElement>('.move-browser .empty-result')
+
+  function filterMoves() {
+    const term = query?.value.trim().toLowerCase().replace(/^#/, '') ?? ''
+    const selectedType = type?.value ?? ''
+    const selectedClass = damageClass?.value ?? ''
+    let visible = 0
+    rows.forEach((row) => {
+      const show = (!term || row.dataset.search?.includes(term))
+        && (!selectedType || row.dataset.type === selectedType)
+        && (!selectedClass || row.dataset.class === selectedClass)
+      row.hidden = !(show ?? false)
+      if (show) visible += 1
+    })
+    if (count) count.textContent = String(visible)
+    if (empty) empty.hidden = visible > 0
+    if (reset) reset.disabled = !term && !selectedType && !selectedClass
+  }
+
+  query?.addEventListener('input', filterMoves)
+  type?.addEventListener('change', filterMoves)
+  damageClass?.addEventListener('change', filterMoves)
+  reset?.addEventListener('click', () => {
+    if (query) query.value = ''
+    if (type) type.value = ''
+    if (damageClass) damageClass.value = ''
+    filterMoves()
+  })
+</script>
+
+<style>
+  .filters { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(130px, 170px) minmax(130px, 170px) auto; gap: 12px; align-items: end; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-raised); padding: 18px; box-shadow: var(--shadow-sm); }
+  .filters label { display: grid; gap: 7px; color: var(--text-secondary); font-size: 12px; font-weight: 650; }
+  input, select { width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: 9px; outline: 0; background: var(--surface); color: var(--text); padding: 8px 12px; font-size: 13px; }
+  input:focus, select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+  input::placeholder { color: var(--muted); }
+  .reset-button { min-height: 42px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-subtle); padding: 8px 18px; color: var(--text-secondary); font-size: 13px; white-space: nowrap; cursor: pointer; }
+  .reset-button:disabled { cursor: default; opacity: .4; }
+  .result-count { margin: 16px 2px 12px; color: var(--muted); font-size: 12px; }
+  .result-count strong { color: var(--text); font-variant-numeric: tabular-nums; }
+  .move-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); }
+  .move-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 13px; }
+  .move-table th, .move-table td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; white-space: nowrap; }
+  .move-table thead th { background: var(--surface-subtle); color: var(--muted); font-size: 11px; font-weight: 650; }
+  .move-table tbody tr:last-child td { border-bottom: 0; }
+  .move-table tbody tr:hover { background: var(--surface-subtle); }
+  .move-number, .machine { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .move-name { min-width: 155px; }
+  .move-name a { display: block; color: var(--text); font-weight: 650; text-decoration: none; }
+  .move-name a:hover { color: var(--gold-strong); text-decoration: underline; }
+  .move-name span { display: block; margin-top: 1px; color: var(--muted); font-size: 11px; }
+  .numeric { font-variant-numeric: tabular-nums; }
+  .empty-result { margin-top: 16px; }
+  @media (max-width: 900px) { .filters { grid-template-columns: 1fr 1fr 1fr; } .move-search { grid-column: 1 / -1; } }
+  @media (max-width: 560px) { .filters { grid-template-columns: 1fr 1fr; padding: 14px; } .reset-button { align-self: end; } }
+</style>

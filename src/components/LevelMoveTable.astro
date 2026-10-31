@@ -1,0 +1,53 @@
+---
+import { moveById, number, value } from '../utils/data'
+import type { Pokemon } from '../utils/data'
+import TypeBadge from './TypeBadge.astro'
+import MoveClassBadge from './MoveClassBadge.astro'
+
+interface Props {
+  entry: Pokemon
+}
+
+const { entry } = Astro.props
+const moves = entry.levelMoves.map((learnset) => ({
+  ...moveById.get(learnset.id)!,
+  level: learnset.level
+}))
+---
+
+{moves.length > 0 ? (
+  <div class="level-move-table-wrap">
+    <table class="level-move-table">
+      <thead><tr><th>等级</th><th>招式</th><th>属性</th><th>分类</th><th>威力</th><th>命中</th><th>PP</th></tr></thead>
+      <tbody>
+        {moves.map((move) => (
+          <tr>
+            <td class="level">Lv. {move.level}</td>
+            <td class="move-name"><a href={`/data/moves/${number(move.id)}`}>{move.names.zh}</a><span>{move.names.en}</span></td>
+            <td><TypeBadge slug={move.type.slug} name={move.type.name} /></td>
+            <td><MoveClassBadge slug={move.damageClass.slug} name={move.damageClass.name} /></td>
+            <td class="numeric">{value(move.power)}</td>
+            <td class="numeric">{value(move.accuracy, '%')}</td>
+            <td class="numeric">{value(move.pp)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+) : <p class="no-moves">该宝可梦没有通过升级学会的招式。</p>}
+
+<style>
+  .level-move-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); }
+  .level-move-table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 13px; }
+  .level-move-table th, .level-move-table td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; white-space: nowrap; }
+  .level-move-table thead th { background: var(--surface-subtle); color: var(--muted); font-size: 11px; }
+  .level-move-table tbody tr:last-child td { border-bottom: 0; }
+  .level-move-table tbody tr:hover { background: var(--surface-subtle); }
+  .level { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .move-name { min-width: 145px; }
+  .move-name a { display: block; color: var(--text); font-weight: 650; text-decoration: none; }
+  .move-name a:hover { color: var(--gold-strong); text-decoration: underline; }
+  .move-name span { display: block; margin-top: 1px; color: var(--muted); font-size: 11px; }
+  .numeric { font-variant-numeric: tabular-nums; }
+  .no-moves { border: 1px dashed var(--line-strong); border-radius: 12px; padding: 20px; color: var(--muted); text-align: center; }
+</style>

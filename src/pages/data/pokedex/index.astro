@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PageHeader from '../../../components/PageHeader.astro'
+import PokedexList from '../../../components/PokedexList.astro'
+---
+
+<BaseLayout wide title="宝可梦图鉴" description="全国图鉴前 493 只宝可梦的第四世代资料、获取方式、进化链与升级招式。">
+  <PageHeader eyebrow="NATIONAL POKÉDEX · 001—493" title="宝可梦图鉴" description="收录全国图鉴前 493 只宝可梦，可点击卡片查看基本资料、获取方式、进化链、升级招式与第四世代能力值。" />
+  <PokedexList />
+  <section class="prose data-notes">
+    <h2>数据说明</h2>
+    <p>图鉴数据与精灵图已保存到本站本地，属性、特性、能力值、进化条件和升级招式均按《心金·魂银》所属的第四世代处理。获取方式包含版本限定、野外遭遇、赠送、定点、NPC 交换、进化、孵蛋、宝可计步器、活动与跨版本传入，并标注适用条件。升级招式不包含 TM／HM、遗传和招式教学。</p>
+    <p>数据来源：<a href="https://github.com/PokeAPI/pokeapi">PokéAPI</a>、<a href="https://www.serebii.net/heartgoldsoulsilver/pokewalker-area.shtml">Serebii：宝可计步器路线</a>与<a href="https://www.serebii.net/heartgoldsoulsilver/gift.shtml">Serebii：赠送及传说宝可梦</a>。</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .data-notes { max-width: 960px; margin-top: 48px; }
+</style>

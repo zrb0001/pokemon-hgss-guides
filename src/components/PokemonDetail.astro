@@ -1,0 +1,170 @@
+---
+import { pokedex, abilityData, number } from '../utils/data'
+import type { Pokemon } from '../utils/data'
+import TypeBadge from './TypeBadge.astro'
+import EvolutionChain from './EvolutionChain.astro'
+import LevelMoveTable from './LevelMoveTable.astro'
+import PokemonAcquisition from './PokemonAcquisition.astro'
+import DetailNav from './DetailNav.astro'
+
+interface Props {
+  entry: Pokemon
+}
+
+const { entry } = Astro.props
+const statLabels = [
+  ['hp', 'HP'],
+  ['attack', '攻击'],
+  ['defense', '防御'],
+  ['specialAttack', '特攻'],
+  ['specialDefense', '特防'],
+  ['speed', '速度']
+] as const
+const totalStats = Object.values(entry.stats).reduce((total, value) => total + value, 0)
+const abilityDescriptions = new Map(abilityData.abilities.map((ability) => [ability.slug, ability.descriptions.zh]))
+const previous = entry.id > 1 ? pokedex.pokemon[entry.id - 2] : undefined
+const next = entry.id < pokedex.count ? pokedex.pokemon[entry.id] : undefined
+---
+
+<article class="pokemon-detail">
+  <div class="hero-panel">
+    <div class="sprite-frame">
+      <span class="sprite-ring" aria-hidden="true"></span>
+      <img src={`/images/pokemon/${number(entry.id)}.webp`} alt={`${entry.names.zh}的心金／魂银精灵图`} width="180" height="180" />
+    </div>
+    <div class="hero-info">
+      <span class="national-number">NATIONAL POKÉDEX <strong>#{number(entry.id)}</strong></span>
+      <div class="detail-types">{entry.types.map((type) => <TypeBadge slug={type.slug} name={type.name} />)}</div>
+      <p class="genus">{entry.genus}</p>
+      <dl class="quick-facts">
+        <div><dt>身高</dt><dd>{entry.height.toFixed(1)} m</dd></div>
+        <div><dt>体重</dt><dd>{entry.weight.toFixed(1)} kg</dd></div>
+        <div><dt>捕获率</dt><dd>{entry.captureRate}</dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <section>
+    <h2><span>01</span>基本资料</h2>
+    <div class="info-table-wrap">
+      <table class="info-table">
+        <tbody>
+          <tr><th>中文名</th><td>{entry.names.zh}</td><th>日文名</th><td>{entry.names.ja}</td></tr>
+          <tr><th>英文名</th><td>{entry.names.en}</td><th>属性</th><td>{entry.types.map((type) => type.name).join(' / ')}</td></tr>
+          <tr>
+            <th>分类</th><td>{entry.genus}</td><th>特性</th>
+            <td>
+              {entry.abilities.map((ability, index) => (
+                <>
+                  <span class="ability-name" tabindex="0" aria-describedby={`ability-${entry.id}-${ability.slug}`}>
+                    {ability.name}<span id={`ability-${entry.id}-${ability.slug}`} class="ability-tooltip" role="tooltip">{abilityDescriptions.get(ability.slug) ?? '暂无特性说明'}</span>
+                  </span>{index < entry.abilities.length - 1 && ' / '}
+                </>
+              ))}
+            </td>
+          </tr>
+          <tr><th>身高</th><td>{entry.height.toFixed(1)} m</td><th>体重</th><td>{entry.weight.toFixed(1)} kg</td></tr>
+          <tr><th>基础经验</th><td>{entry.baseExperience}</td><th>捕获率</th><td>{entry.captureRate}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span>02</span>能力值</h2>
+    <div class="stats-panel">
+      {statLabels.map(([key, label]) => (
+        <div class:list={['stat-row', `stat-${key}`]}>
+          <span class="stat-label">{label}</span>
+          <strong class="stat-value">{entry.stats[key]}</strong>
+          <span class="stat-track" aria-hidden="true"><span class="stat-bar" style={{ width: `${Math.max(2, entry.stats[key] / 255 * 100)}%` }}></span></span>
+        </div>
+      ))}
+      <div class="stat-row stat-total"><span class="stat-label">总和</span><strong class="stat-value">{totalStats}</strong><span /></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span>03</span>进化链</h2>
+    <EvolutionChain entry={entry} />
+  </section>
+
+  <section>
+    <h2><span>04</span>升级招式</h2>
+    <p class="section-note">以下列出《心金·魂银》中通过升级学会的招式。</p>
+    <LevelMoveTable entry={entry} />
+  </section>
+
+  <section>
+    <h2><span>05</span>获取方式</h2>
+    <PokemonAcquisition entry={entry} />
+  </section>
+
+  <DetailNav
+    label="相邻图鉴"
+    previous={previous ? { href: `/data/pokedex/${number(previous.id)}`, label: `#${number(previous.id)} ${previous.names.zh}` } : undefined}
+    next={next ? { href: `/data/pokedex/${number(next.id)}`, label: `#${number(next.id)} ${next.names.zh}` } : undefined}
+    backHref="/data/pokedex"
+    backLabel="返回图鉴"
+  />
+</article>
+
+<style>
+  .hero-panel { position: relative; display: flex; overflow: hidden; align-items: center; gap: 32px; margin: 26px 0 38px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(125deg, var(--surface-raised), var(--surface-subtle)); padding: 28px; }
+  .hero-panel::after { position: absolute; right: -70px; bottom: -110px; width: 280px; height: 280px; border: 1px solid var(--line); border-radius: 50%; content: ''; opacity: .5; }
+  .sprite-frame { position: relative; display: grid; flex: 0 0 210px; min-height: 210px; place-items: center; }
+  .sprite-ring { position: absolute; width: 185px; height: 185px; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--surface); box-shadow: inset 0 0 0 14px var(--surface-subtle); }
+  .sprite-ring::after { position: absolute; top: 50%; left: -18px; width: 220px; border-top: 1px solid var(--line); content: ''; }
+  .sprite-frame img { position: relative; z-index: 1; width: 180px; height: 180px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 8px 6px rgb(0 0 0 / .1)); }
+  .hero-info { position: relative; z-index: 1; flex: 1; }
+  .national-number { color: var(--muted); font-family: var(--font-display); font-size: 11px; font-weight: 650; letter-spacing: .12em; }
+  .national-number strong { margin-left: 6px; color: var(--gold-strong); font-size: 15px; }
+  .detail-types { display: flex; gap: 6px; margin: 16px 0 12px; }
+  .genus { margin: 0; color: var(--text-secondary); font-size: 16px; }
+  .quick-facts { display: flex; gap: 32px; margin: 24px 0 0; }
+  .quick-facts div { display: grid; gap: 2px; }
+  .quick-facts dt { color: var(--muted); font-size: 11px; }
+  .quick-facts dd { margin: 0; color: var(--text); font-size: 15px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  section { margin-top: 38px; }
+  h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: 22px; letter-spacing: -.02em; }
+  h2 > span { color: var(--gold); font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: .1em; }
+  .section-note { margin: -6px 0 16px; color: var(--muted); font-size: 13px; }
+  .info-table-wrap { overflow: visible; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); }
+  .info-table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 13px; }
+  .info-table th, .info-table td { border-bottom: 1px solid var(--line); padding: 12px 15px; text-align: left; }
+  .info-table tr:last-child th, .info-table tr:last-child td { border-bottom: 0; }
+  .info-table th { width: 13%; background: var(--surface-subtle); color: var(--muted); font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .info-table td { width: 37%; color: var(--text-secondary); }
+  .ability-name { position: relative; display: inline-block; border-bottom: 1px dotted var(--muted); cursor: help; outline: none; }
+  .ability-name:focus-visible { border-radius: 2px; outline: 2px solid var(--gold); outline-offset: 2px; }
+  .ability-tooltip { position: absolute; top: calc(100% + 9px); right: 0; z-index: 30; visibility: hidden; width: 320px; max-width: calc(100vw - 48px); border: 1px solid var(--line); border-radius: 8px; background: var(--surface-raised); padding: 10px 12px; color: var(--text); font-size: 12px; font-weight: 400; line-height: 1.7; white-space: normal; opacity: 0; box-shadow: var(--shadow-lg); pointer-events: none; transform: translateY(-4px); transition: .15s; }
+  .ability-name:hover .ability-tooltip, .ability-name:focus .ability-tooltip { visibility: visible; opacity: 1; transform: translateY(0); }
+  .stats-panel { border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); padding: 18px 20px; }
+  .stat-row { display: grid; grid-template-columns: 48px 48px minmax(100px, 1fr); gap: 12px; align-items: center; padding: 7px 0; }
+  .stat-label { color: var(--text-secondary); font-size: 12px; }
+  .stat-value { font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; }
+  .stat-track { overflow: hidden; height: 7px; border-radius: 999px; background: var(--surface-inset); }
+  .stat-bar { display: block; height: 100%; border-radius: inherit; background: var(--stat-color, var(--gold)); }
+  .stat-hp { --stat-color: #4c9c74; }
+  .stat-attack { --stat-color: #d46b50; }
+  .stat-defense { --stat-color: #d1a23d; }
+  .stat-specialAttack { --stat-color: #537ec8; }
+  .stat-specialDefense { --stat-color: #9270b7; }
+  .stat-speed { --stat-color: #379ca7; }
+  .stat-total { margin-top: 7px; border-top: 1px solid var(--line); padding-top: 14px; }
+  @media (max-width: 640px) {
+    .hero-panel { flex-direction: column; gap: 12px; padding: 20px; text-align: center; }
+    .sprite-frame { flex-basis: 190px; min-height: 190px; }
+    .sprite-frame img { width: 165px; height: 165px; }
+    .sprite-ring { width: 165px; height: 165px; }
+    .detail-types, .quick-facts { justify-content: center; }
+    .quick-facts { gap: 24px; margin-top: 18px; }
+    .info-table-wrap { overflow-x: auto; }
+    .info-table, .info-table tbody { display: block; width: 100%; min-width: 0; }
+    .info-table tr { display: grid; grid-template-columns: 72px minmax(0, 1fr); }
+    .info-table th, .info-table td { width: auto; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+    .info-table th:nth-of-type(2), .info-table td:nth-of-type(2) { border-top: 1px solid var(--line); }
+    .stats-panel { padding: 14px; }
+    .stat-row { grid-template-columns: 42px 38px minmax(80px, 1fr); gap: 8px; }
+  }
+</style>

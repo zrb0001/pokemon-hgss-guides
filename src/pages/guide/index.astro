@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { guideChapters, guideTopics } from '../../utils/site'
+---
+
+<BaseLayout guide title="流程攻略总览" description="《宝可梦 心金·魂银》城都与关都完整流程及专题攻略。">
+  <header class="guide-overview-header">
+    <p>JOHTO & KANTO · WALKTHROUGH</p>
+    <h1>流程攻略总览</h1>
+    <span>本栏目收录《宝可梦 心金·魂银》的完整流程攻略，每个周目使用一篇连续文档，可按本页目录跳转到对应地点。</span>
+  </header>
+
+  <section class="overview-section">
+    <h2><span>01</span>篇章导航</h2>
+    <div class="overview-chapters">
+      {guideChapters.map((chapter, index) => (
+        <a href={chapter.href}>
+          <p>{chapter.eyebrow}</p>
+          <h3>{chapter.fullTitle}</h3>
+          <span>{chapter.description}</span>
+          <strong>开始阅读 <i>→</i></strong>
+          <b aria-hidden="true">0{index + 1}</b>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="overview-section">
+    <h2><span>02</span>专题攻略</h2>
+    <div class="overview-topics">
+      {guideTopics.map((topic, index) => (
+        <a href={topic.href}>
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <div><strong>{topic.title}</strong><p>{topic.description}</p></div>
+          <i aria-hidden="true">↗</i>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .guide-overview-header { border-bottom: 1px solid var(--line); padding: 8px 0 28px; }
+  .guide-overview-header > p { margin: 0 0 10px; color: var(--gold-strong); font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: .15em; }
+  h1 { margin: 0; font-size: clamp(32px, 4vw, 42px); letter-spacing: -.04em; }
+  .guide-overview-header > span { display: block; max-width: 720px; margin-top: 14px; color: var(--text-secondary); font-size: 15px; line-height: 1.85; }
+  .overview-section { margin-top: 38px; }
+  .overview-section > h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; font-size: 22px; }
+  .overview-section > h2 span { color: var(--gold); font-family: var(--font-display); font-size: 10px; }
+  .overview-chapters { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .overview-chapters a { position: relative; display: flex; min-height: 245px; overflow: hidden; flex-direction: column; align-items: flex-start; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-raised); padding: 24px; color: var(--text); text-decoration: none; }
+  .overview-chapters a:hover { border-color: var(--gold); }
+  .overview-chapters p { position: relative; z-index: 1; margin: 0; color: var(--gold-strong); font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: .1em; }
+  .overview-chapters h3 { position: relative; z-index: 1; margin: 14px 0 8px; font-size: 18px; line-height: 1.5; }
+  .overview-chapters a > span { position: relative; z-index: 1; color: var(--text-secondary); font-size: 12px; line-height: 1.75; }
+  .overview-chapters strong { position: relative; z-index: 1; display: flex; gap: 12px; margin-top: auto; padding-top: 16px; color: var(--gold-strong); font-size: 12px; }
+  .overview-chapters i { font-style: normal; }
+  .overview-chapters b { position: absolute; right: 8px; bottom: -24px; color: var(--surface-inset); font-family: var(--font-display); font-size: 100px; line-height: 1; }
+  .overview-topics { border-top: 1px solid var(--line); }
+  .overview-topics > a { display: grid; grid-template-columns: 30px 1fr auto; gap: 12px; align-items: center; border-bottom: 1px solid var(--line); padding: 16px 6px; color: var(--text); text-decoration: none; }
+  .overview-topics > a > span { color: var(--gold); font-family: var(--font-display); font-size: 10px; }
+  .overview-topics strong { font-size: 14px; }
+  .overview-topics p { margin: 3px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+  .overview-topics i { color: var(--muted); font-style: normal; }
+  .overview-topics a:hover strong, .overview-topics a:hover i { color: var(--gold-strong); }
+  @media (max-width: 700px) { .overview-chapters { grid-template-columns: 1fr; } .overview-chapters a { min-height: 225px; } }
+  @media (max-width: 480px) { .overview-topics p { font-size: 11px; } }
+</style>

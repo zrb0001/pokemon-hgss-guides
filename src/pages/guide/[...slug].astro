@@ -1,0 +1,30 @@
+---
+import { getCollection, render } from 'astro:content'
+import type { CollectionEntry } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides')
+  return guides.map((entry) => ({
+    params: { slug: entry.id.replace(/\/index$/, '') },
+    props: { entry }
+  }))
+}
+
+interface Props {
+  entry: CollectionEntry<'guides'>
+}
+
+const { entry } = Astro.props
+const { Content, headings } = await render(entry)
+const title = entry.body?.match(/^# (.+)$/m)?.[1] ?? '流程攻略'
+---
+
+<BaseLayout guide title={title} headings={headings}>
+  <nav class="breadcrumbs" aria-label="面包屑">
+    <a href="/guide/">流程攻略</a><span aria-hidden="true">/</span><span>{title}</span>
+  </nav>
+  <article class="prose">
+    <Content />
+  </article>
+</BaseLayout>

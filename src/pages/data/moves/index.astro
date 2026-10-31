@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PageHeader from '../../../components/PageHeader.astro'
+import MoveList from '../../../components/MoveList.astro'
+---
+
+<BaseLayout wide title="招式资料" description="第四世代全部 467 个招式的属性、分类、数值、效果与学习机器资料。">
+  <PageHeader eyebrow="MOVE DATABASE · GENERATION IV" title="招式资料" description="收录第四世代全部 467 个招式，可按属性和分类筛选，点击招式名称查看完整资料。" />
+  <MoveList />
+  <section class="prose data-notes">
+    <h2>数据说明</h2>
+    <ul>
+      <li>招式数据已保存到本站本地，威力、命中、PP、属性和效果按《心金·魂银》所属的第四世代处理。</li>
+      <li>“学习机器”一栏对应该作中的 TM01–TM92 与 HM01–HM08；没有学习机器的招式显示为“—”。</li>
+      <li>中文、日文游戏说明采用官方后续文本，详情页另保留《心金·魂银》的英文游戏说明与英文效果原文。</li>
+      <li>数据来源：<a href="https://github.com/PokeAPI/pokeapi">PokéAPI</a>。</li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .data-notes { max-width: 960px; margin-top: 42px; }
+</style>

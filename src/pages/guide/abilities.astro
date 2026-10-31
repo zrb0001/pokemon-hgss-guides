@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import PageHeader from '../../components/PageHeader.astro'
+import AbilityList from '../../components/AbilityList.astro'
+---
+
+<BaseLayout guide title="宝可梦特性列表" headings={[{ depth: 2, slug: '数据说明', text: '数据说明' }]}>
+  <PageHeader eyebrow="ABILITY DATABASE · GENERATION IV" title="宝可梦特性列表" description="收录《宝可梦 心金·魂银》所属的第三、第四世代全部 123 个特性。特性名称按「中文（日文 / English）」对照展示。" />
+  <AbilityList />
+  <section class="prose data-notes">
+    <h2 id="数据说明">数据说明</h2>
+    <p>特性数据已保存到本站本地。中文说明采用官方后续文本；部分特性的效果在后续世代有所调整，可展开每行的《心金·魂银》英文原文核对该作中的说明。数据来源：<a href="https://github.com/PokeAPI/pokeapi">PokéAPI</a>。</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .data-notes { margin-top: 36px; }
+</style>

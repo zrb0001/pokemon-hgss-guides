@@ -1,0 +1,43 @@
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-kicker">HEARTGOLD · SOULSILVER</span>
+      <strong>心金·魂银攻略站</strong>
+      <p>记录城都与关都的每一段旅程。</p>
+    </div>
+    <nav aria-label="页脚导航">
+      <a href="/guide/">流程攻略</a>
+      <a href="/data/pokedex">宝可梦图鉴</a>
+      <a href="/data/moves">招式资料</a>
+      <a href="/about">关于本站</a>
+    </nav>
+    <div class="footer-legal">
+      <p>本站为爱好者制作的非官方攻略站，内容整理自公开资料，仅供学习交流。</p>
+      <p>Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer { margin-top: 88px; border-top: 1px solid var(--line); background: var(--surface-subtle); }
+  .footer-inner { display: grid; grid-template-columns: 1.2fr 1fr 1.5fr; gap: 48px; width: min(100% - 48px, 1280px); margin: 0 auto; padding: 44px 0; }
+  .footer-brand { display: flex; flex-direction: column; align-items: flex-start; }
+  .footer-kicker { margin-bottom: 8px; color: var(--gold-strong); font-size: 10px; font-weight: 750; letter-spacing: .16em; }
+  .footer-brand strong { font-size: 18px; }
+  .footer-brand p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+  nav { display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 12px 24px; }
+  nav a { color: var(--text-secondary); font-size: 13px; text-decoration: none; }
+  nav a:hover { color: var(--gold-strong); }
+  .footer-legal { color: var(--muted); font-size: 12px; line-height: 1.8; }
+  .footer-legal p { margin: 0; }
+  .footer-legal p + p { margin-top: 6px; }
+  @media (max-width: 800px) {
+    .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .footer-legal { grid-column: 1 / -1; }
+  }
+  @media (max-width: 520px) {
+    .site-footer { margin-top: 56px; }
+    .footer-inner { grid-template-columns: 1fr; width: min(100% - 32px, 1280px); padding: 34px 0; }
+    .footer-legal { grid-column: auto; }
+  }
+</style>

@@ -1,0 +1,208 @@
+---
+import { getEntry, render } from 'astro:content'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { pokedex, moveData } from '../utils/data'
+import { guideChapters } from '../utils/site'
+
+const weeklyEvents = await getEntry('home', 'weekly-events')
+if (!weeklyEvents) throw new Error('Missing weekly events content')
+const { Content: WeeklyEvents } = await render(weeklyEvents)
+---
+
+<BaseLayout home title="心金·魂银攻略站">
+  <div class="home-hero" slot="hero">
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="hero-eyebrow"><span></span> POKÉMON · GENERATION IV</p>
+        <h1>心金<span>·</span>魂银<small>攻略站</small></h1>
+        <p class="hero-english">HeartGold / SoulSilver</p>
+        <p class="hero-tagline">宝可梦 心金·魂银 中文流程攻略与资料站（建设中）</p>
+        <div class="hero-actions">
+          <a class="primary-button" href="/guide/">开始阅读攻略 <span aria-hidden="true">→</span></a>
+          <a class="secondary-button" href="/data/pokedex">查看宝可梦图鉴</a>
+        </div>
+        <div class="hero-note"><span>城都</span><i></i><span>关都</span><i></i><span>第四世代资料</span></div>
+      </div>
+      <div class="edition-showcase" aria-label="心金与魂银">
+        <div class="edition-card heartgold">
+          <div class="edition-top"><span>HEARTGOLD</span><strong>心金</strong></div>
+          <img src="/images/pokemon/250.webp" alt="凤王" width="240" height="240" />
+          <span class="edition-number">No. 250 · HO-OH</span>
+        </div>
+        <div class="edition-card soulsilver">
+          <div class="edition-top"><span>SOULSILVER</span><strong>魂银</strong></div>
+          <img src="/images/pokemon/249.webp" alt="洛奇亚" width="240" height="240" />
+          <span class="edition-number">No. 249 · LUGIA</span>
+        </div>
+        <span class="showcase-stamp">JOHTO<br />FIELD NOTES</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div><strong>{pokedex.count}</strong><span>宝可梦资料</span></div>
+      <div><strong>{moveData.count}</strong><span>第四世代招式</span></div>
+      <div><strong>16</strong><span>道馆挑战</span></div>
+      <div><strong>2</strong><span>完整地区旅程</span></div>
+    </div>
+  </div>
+
+  <section class="journey-section home-section">
+    <header class="section-heading">
+      <div><p>THE JOURNEY</p><h2>从城都，到关都</h2></div>
+      <span>一篇连续指引，陪伴每一段冒险。</span>
+    </header>
+    <div class="chapter-grid">
+      {guideChapters.map((chapter, index) => (
+        <a class:list={['chapter-card', `chapter-${index + 1}`]} href={chapter.href}>
+          <div class="chapter-copy">
+            <p>{chapter.eyebrow}</p>
+            <h3>{chapter.fullTitle}</h3>
+            <span>{chapter.description}</span>
+            <strong>阅读本篇 <i aria-hidden="true">→</i></strong>
+          </div>
+          <div class="chapter-art" aria-hidden="true">
+            {index === 0 ? (
+              <div class="starter-sprites"><img src="/images/pokemon/152.webp" alt="" /><img src="/images/pokemon/155.webp" alt="" /><img src="/images/pokemon/158.webp" alt="" /></div>
+            ) : (
+              <div class="starter-sprites"><img src="/images/pokemon/003.webp" alt="" /><img src="/images/pokemon/006.webp" alt="" /><img src="/images/pokemon/009.webp" alt="" /></div>
+            )}
+          </div>
+          <span class="chapter-index">0{index + 1}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="weekly-section home-section" id="weekly-events">
+    <header class="section-heading">
+      <div><p>WEEKLY SCHEDULE</p><h2>每周事件时间表</h2></div>
+      <span>按星期与时段安排游戏活动。</span>
+    </header>
+    <div class="weekly-schedule prose">
+      <WeeklyEvents />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .home-hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); background: var(--surface); }
+  .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 56px 56px; opacity: .22; mask-image: linear-gradient(to right, #000, transparent 70%); }
+  .hero-inner { position: relative; display: grid; grid-template-columns: minmax(380px, .9fr) minmax(500px, 1.1fr); gap: 40px; width: min(100% - 64px, 1280px); min-height: 560px; align-items: center; margin: 0 auto; padding: 58px 0 48px; }
+  .hero-copy { position: relative; z-index: 2; }
+  .hero-eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 24px; color: var(--gold-strong); font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: .18em; }
+  .hero-eyebrow span { width: 24px; height: 1px; background: var(--gold); }
+  h1 { display: flex; flex-wrap: wrap; align-items: baseline; margin: 0; color: var(--text); font-family: var(--font-serif); font-size: clamp(54px, 6vw, 78px); font-weight: 700; letter-spacing: -.07em; line-height: 1.08; }
+  h1 > span { color: var(--gold); }
+  h1 small { flex-basis: 100%; margin-top: 12px; font-family: var(--font-body); font-size: .48em; font-weight: 650; letter-spacing: .24em; }
+  .hero-english { margin: 22px 0 0; color: var(--muted); font-family: var(--font-display); font-size: 16px; font-weight: 500; letter-spacing: .12em; }
+  .hero-tagline { max-width: 450px; margin: 16px 0 0; color: var(--text-secondary); font-size: 15px; line-height: 1.8; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .hero-actions a { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 20px; border-radius: 9px; padding: 0 22px; font-size: 14px; font-weight: 650; text-decoration: none; transition: .2s; }
+  .primary-button { background: var(--text); color: var(--surface); }
+  .primary-button:hover { background: var(--gold-strong); color: #fff; transform: translateY(-2px); }
+  .secondary-button { border: 1px solid var(--line-strong); background: var(--surface-raised); color: var(--text); }
+  .secondary-button:hover { border-color: var(--gold); color: var(--gold-strong); }
+  .hero-note { display: flex; align-items: center; gap: 10px; margin-top: 26px; color: var(--muted); font-size: 11px; }
+  .hero-note i { width: 3px; height: 3px; border-radius: 50%; background: var(--gold); }
+  .edition-showcase { position: relative; display: flex; align-items: center; justify-content: center; min-height: 400px; perspective: 1000px; }
+  .edition-card { position: absolute; display: flex; width: 270px; height: 360px; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; padding: 22px; box-shadow: 0 24px 60px rgb(40 38 30 / .13); }
+  .edition-card::before { position: absolute; inset: 0; content: ''; opacity: .6; }
+  .edition-card.heartgold { z-index: 2; background: #f1e5c7; color: #624b23; transform: rotate(-7deg) translate(-75px, 5px); }
+  .edition-card.heartgold::before { background: radial-gradient(circle at 70% 50%, #fff9, transparent 60%); }
+  .edition-card.soulsilver { background: #dce3e5; color: #40515b; transform: rotate(7deg) translate(85px, -5px); }
+  .edition-card.soulsilver::before { background: radial-gradient(circle at 30% 50%, #fff9, transparent 60%); }
+  .edition-top { position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; }
+  .edition-top span { font-family: var(--font-display); font-size: 9px; font-weight: 750; letter-spacing: .15em; }
+  .edition-top strong { font-family: var(--font-serif); font-size: 20px; }
+  .edition-card img { position: relative; z-index: 1; width: 240px; height: 240px; align-self: center; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 12px 8px rgb(0 0 0 / .12)); }
+  .edition-number { position: relative; z-index: 1; margin-top: auto; font-family: var(--font-display); font-size: 9px; font-weight: 650; letter-spacing: .13em; }
+  .showcase-stamp { position: absolute; right: -6px; bottom: 4px; z-index: 3; display: grid; width: 86px; height: 86px; place-items: center; border: 1px solid var(--gold); border-radius: 50%; color: var(--gold-strong); font-family: var(--font-display); font-size: 9px; font-weight: 750; letter-spacing: .12em; line-height: 1.6; text-align: center; transform: rotate(10deg); }
+  .hero-stats { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); width: min(100% - 64px, 1280px); margin: 0 auto; border-top: 1px solid var(--line); }
+  .hero-stats div { display: flex; align-items: baseline; gap: 10px; padding: 20px 0; }
+  .hero-stats strong { color: var(--text); font-family: var(--font-display); font-size: 24px; font-weight: 650; }
+  .hero-stats span { color: var(--muted); font-size: 11px; }
+  .home-section { width: min(100% - 48px, 1180px); margin: 76px auto 0; }
+  .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
+  .section-heading p { margin: 0 0 6px; color: var(--gold-strong); font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: .16em; }
+  .section-heading h2 { margin: 0; font-size: 28px; letter-spacing: -.035em; }
+  .section-heading > span { color: var(--muted); font-size: 12px; }
+  .section-heading > a { color: var(--text-secondary); font-size: 12px; text-decoration: none; }
+  .section-heading > a:hover { color: var(--gold-strong); }
+  .chapter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .chapter-card { position: relative; display: grid; min-height: 280px; grid-template-columns: 1fr 155px; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--surface-raised); color: var(--text); text-decoration: none; transition: .25s; }
+  .chapter-card:hover { border-color: var(--gold); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+  .chapter-copy { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; padding: 30px 0 28px 30px; }
+  .chapter-copy > p { margin: 0 0 14px; color: var(--gold-strong); font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: .13em; }
+  .chapter-copy h3 { max-width: 260px; margin: 0; font-size: 22px; line-height: 1.45; }
+  .chapter-copy > span { max-width: 310px; margin-top: 12px; color: var(--text-secondary); font-size: 13px; line-height: 1.75; }
+  .chapter-copy > strong { display: flex; gap: 16px; align-items: center; margin-top: auto; padding-top: 20px; color: var(--gold-strong); font-size: 12px; }
+  .chapter-copy i { font-style: normal; }
+  .chapter-art { position: relative; display: flex; align-items: flex-end; }
+  .starter-sprites { position: relative; z-index: 1; display: flex; align-items: flex-end; margin: 0 -28px 28px -50px; }
+  .starter-sprites img { width: 98px; height: 98px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 8px 6px rgb(0 0 0 / .08)); }
+  .starter-sprites img + img { margin-left: -40px; }
+  .starter-sprites img:nth-child(2) { width: 114px; height: 114px; }
+  .chapter-index { position: absolute; top: -25px; right: 8px; color: var(--surface-inset); font-family: var(--font-display); font-size: 110px; font-weight: 750; line-height: 1; }
+  .chapter-2 { background: linear-gradient(135deg, var(--surface-raised), var(--silver-soft)); }
+  .chapter-1 { background: linear-gradient(135deg, var(--surface-raised), var(--gold-soft)); }
+  .weekly-schedule :global(h1:first-child) { display: none; }
+  .weekly-schedule :global(> p:first-of-type) { margin-top: 0; }
+  .weekly-schedule :global(h2) { margin-top: 42px; }
+  @media (max-width: 1100px) {
+    .hero-inner { grid-template-columns: .9fr 1.1fr; width: min(100% - 48px, 1280px); }
+    .edition-card { width: 230px; height: 330px; }
+    .edition-card img { width: 210px; height: 210px; }
+    .edition-card.heartgold { transform: rotate(-7deg) translate(-55px, 5px); }
+    .edition-card.soulsilver { transform: rotate(7deg) translate(65px, -5px); }
+    .chapter-card { grid-template-columns: 1fr 100px; }
+    .starter-sprites { margin-left: -70px; }
+    .starter-sprites img { width: 82px; height: 82px; }
+    .starter-sprites img:nth-child(2) { width: 96px; height: 96px; }
+  }
+  @media (max-width: 850px) {
+    .hero-inner { grid-template-columns: 1fr; padding-top: 54px; text-align: center; }
+    .hero-copy { display: flex; flex-direction: column; align-items: center; }
+    h1 { justify-content: center; }
+    .edition-showcase { min-height: 390px; }
+    .hero-stats { width: min(100% - 48px, 1280px); }
+    .hero-stats div { flex-direction: column; align-items: center; gap: 0; }
+    .chapter-grid { grid-template-columns: 1fr; }
+    .chapter-card { grid-template-columns: 1fr 190px; }
+    .starter-sprites { margin-left: -40px; }
+  }
+  @media (max-width: 600px) {
+    .hero-inner { width: min(100% - 32px, 1280px); min-height: 0; gap: 28px; padding: 42px 0 28px; }
+    .hero-eyebrow { margin-bottom: 18px; font-size: 9px; }
+    h1 { font-size: 49px; }
+    h1 small { margin-top: 10px; font-size: 23px; }
+    .hero-english { margin-top: 18px; font-size: 13px; }
+    .hero-tagline { font-size: 13px; }
+    .hero-actions { width: 100%; margin-top: 26px; }
+    .hero-actions a { flex: 1; gap: 8px; padding: 0 12px; font-size: 12px; }
+    .hero-note { margin-top: 20px; }
+    .edition-showcase { min-height: 310px; transform: scale(.9); }
+    .edition-card { width: 200px; height: 275px; border-radius: 14px; padding: 16px; }
+    .edition-card img { width: 175px; height: 175px; }
+    .edition-card.heartgold { transform: rotate(-7deg) translate(-52px, 2px); }
+    .edition-card.soulsilver { transform: rotate(7deg) translate(55px, -2px); }
+    .edition-top strong { font-size: 17px; }
+    .showcase-stamp { right: 50%; bottom: -10px; width: 68px; height: 68px; font-size: 7px; transform: translateX(50%) rotate(10deg); }
+    .hero-stats { width: calc(100% - 32px); grid-template-columns: repeat(2, 1fr); }
+    .hero-stats div { padding: 14px 0; }
+    .hero-stats strong { font-size: 21px; }
+    .home-section { width: calc(100% - 28px); margin-top: 54px; }
+    .section-heading { align-items: flex-start; }
+    .section-heading h2 { font-size: 24px; }
+    .section-heading > span { display: none; }
+    .section-heading > a { padding-top: 20px; white-space: nowrap; }
+    .chapter-card { min-height: 300px; grid-template-columns: 1fr 85px; }
+    .chapter-copy { padding: 24px 0 24px 22px; }
+    .chapter-copy h3 { font-size: 20px; }
+    .chapter-copy > span { font-size: 12px; }
+    .starter-sprites { margin: 0 -25px 30px -85px; flex-direction: column; align-items: center; }
+    .starter-sprites img { width: 72px; height: 72px; }
+    .starter-sprites img + img { margin: -25px 0 0; }
+    .starter-sprites img:nth-child(2) { width: 82px; height: 82px; }
+    .chapter-index { font-size: 80px; }
+  }
+</style>

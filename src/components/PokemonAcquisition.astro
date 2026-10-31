@@ -1,0 +1,59 @@
+---
+import type { Pokemon } from '../utils/data'
+
+interface Props {
+  entry: Pokemon
+}
+
+const { entry } = Astro.props
+const versionNames: Record<string, string> = { heartgold: '心金', soulsilver: '魂银' }
+
+function levelText(minLevel: number | null, maxLevel: number | null) {
+  if (minLevel === null || maxLevel === null) return ''
+  return minLevel === maxLevel ? `Lv. ${minLevel}` : `Lv. ${minLevel}–${maxLevel}`
+}
+---
+
+<div class="acquisition-panel">
+  <p class="acquisition-note">只标注单个版本的记录为版本限定，另一版本需通过通信交换获得。活动与联动内容不属于普通单机流程。</p>
+  <div class="acquisition-list">
+    {entry.acquisition.map((record) => (
+      <div class="acquisition-record">
+        <div class="acquisition-heading">
+          <strong class="acquisition-method">{record.method}</strong>
+          <span class="version-labels">
+            {record.versions.map((version) => <span class:list={['version-label', `version-${version}`]}>{versionNames[version]}</span>)}
+          </span>
+        </div>
+        <div class="acquisition-content">
+          {record.text ? record.text : (
+            <>
+              <span>{record.location}</span>
+              {record.minLevel !== null && <span class="level-label">{levelText(record.minLevel, record.maxLevel)}</span>}
+            </>
+          )}
+          {record.conditions.length > 0 && <ul class="condition-list">{record.conditions.map((condition) => <li>{condition}</li>)}</ul>}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .acquisition-panel { margin: 16px 0 28px; }
+  .acquisition-note { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+  .acquisition-list { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); }
+  .acquisition-record { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(240px, 1.5fr); gap: 20px; padding: 14px 16px; }
+  .acquisition-record + .acquisition-record { border-top: 1px solid var(--line); }
+  .acquisition-record:nth-child(even) { background: color-mix(in srgb, var(--surface-subtle) 60%, transparent); }
+  .acquisition-heading { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .acquisition-method { font-size: 13px; }
+  .version-labels { display: inline-flex; gap: 4px; }
+  .version-label { border-radius: 999px; padding: 2px 7px; font-size: 10px; font-weight: 650; line-height: 1.5; }
+  .version-heartgold { background: var(--gold-soft); color: var(--gold-strong); }
+  .version-soulsilver { background: var(--silver-soft); color: var(--silver); }
+  .acquisition-content { color: var(--text-secondary); font-size: 13px; }
+  .level-label { margin-left: 10px; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .condition-list { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 12px; }
+  @media (max-width: 640px) { .acquisition-record { grid-template-columns: 1fr; gap: 8px; padding: 13px 14px; } }
+</style>

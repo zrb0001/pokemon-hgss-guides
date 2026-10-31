@@ -1,0 +1,74 @@
+---
+import { abilityData, number } from '../utils/data'
+---
+
+<section class="ability-browser" aria-label="特性列表查询">
+  <div class="ability-filter">
+    <label for="ability-query">搜索特性</label>
+    <input id="ability-query" type="search" placeholder="输入中文、日文或英文名称" autocomplete="off" />
+    <p aria-live="polite">共 <strong>{abilityData.count}</strong> 个特性</p>
+  </div>
+  <div class="ability-table-wrap">
+    <table class="ability-table">
+      <thead><tr><th>编号</th><th>特性名称</th><th>效果说明</th></tr></thead>
+      <tbody>
+        {abilityData.abilities.map((entry) => (
+          <tr data-ability-row data-search={`${entry.id} ${Object.values(entry.names).join(' ')}`.toLowerCase()}>
+            <td class="ability-number">#{number(entry.id)}</td>
+            <td class="ability-name"><strong>{entry.names.zh}</strong><span>{entry.names.ja} / {entry.names.en}</span></td>
+            <td class="ability-description">
+              <p>{entry.descriptions.zh}</p>
+              <details><summary>《心金·魂银》英文原文</summary><p lang="en">{entry.descriptions.hgss}</p></details>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="empty-result" hidden>没有符合条件的特性。</p>
+</section>
+
+<script>
+  const input = document.querySelector<HTMLInputElement>('#ability-query')
+  const rows = [...document.querySelectorAll<HTMLTableRowElement>('[data-ability-row]')]
+  const count = document.querySelector<HTMLElement>('.ability-filter strong')
+  const empty = document.querySelector<HTMLElement>('.ability-browser .empty-result')
+  input?.addEventListener('input', () => {
+    const term = input.value.trim().toLowerCase()
+    let visible = 0
+    rows.forEach((row) => {
+      row.hidden = Boolean(term && !row.dataset.search?.includes(term))
+      if (!row.hidden) visible += 1
+    })
+    if (count) count.textContent = String(visible)
+    if (empty) empty.hidden = visible > 0
+  })
+</script>
+
+<style>
+  .ability-filter { display: grid; grid-template-columns: auto minmax(220px, 420px) 1fr; gap: 14px; align-items: center; margin-bottom: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); padding: 14px 16px; }
+  .ability-filter label { font-size: 12px; font-weight: 650; }
+  .ability-filter input { min-height: 40px; border: 1px solid var(--line); border-radius: 8px; outline: 0; background: var(--surface); padding: 8px 12px; color: var(--text); font-size: 13px; }
+  .ability-filter input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+  .ability-filter p { margin: 0; color: var(--muted); font-size: 12px; text-align: right; }
+  .ability-filter strong { color: var(--text); }
+  .ability-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); }
+  .ability-table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 13px; }
+  .ability-table th, .ability-table td { border-bottom: 1px solid var(--line); padding: 13px 14px; text-align: left; vertical-align: top; }
+  .ability-table thead th { background: var(--surface-subtle); color: var(--muted); font-size: 11px; white-space: nowrap; }
+  .ability-table tbody tr:last-child td { border-bottom: 0; }
+  .ability-table tbody tr:hover { background: var(--surface-subtle); }
+  .ability-number { width: 70px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ability-name { width: 190px; }
+  .ability-name strong, .ability-name span { display: block; }
+  .ability-name strong { color: var(--text); font-size: 14px; }
+  .ability-name span { margin-top: 4px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+  .ability-description p { margin: 0; line-height: 1.75; }
+  details { margin-top: 5px; color: var(--muted); font-size: 11px; }
+  summary { cursor: pointer; }
+  details p { margin-top: 6px; color: var(--text-secondary); }
+  @media (max-width: 640px) {
+    .ability-filter { grid-template-columns: 1fr; gap: 8px; }
+    .ability-filter p { text-align: left; }
+  }
+</style>

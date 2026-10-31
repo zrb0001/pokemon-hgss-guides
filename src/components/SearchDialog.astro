@@ -1,0 +1,154 @@
+<dialog id="site-search" aria-labelledby="search-title">
+  <div class="search-box">
+    <div class="search-input-row">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8" /><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+      <label class="sr-only" for="site-search-input" id="search-title">搜索本站</label>
+      <input id="site-search-input" type="search" placeholder="搜索攻略、宝可梦或招式…" autocomplete="off" />
+      <button type="button" data-close-search aria-label="关闭搜索">Esc</button>
+    </div>
+    <p class="search-hint">输入中文、日文、英文名称或图鉴编号</p>
+    <div class="search-results" aria-live="polite">
+      <p class="search-empty">开始输入以搜索全站内容。</p>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd><kbd>↓</kbd> 浏览</span><span><kbd>Enter</kbd> 打开</span><span>本地搜索 · 无需联网</span></div>
+  </div>
+</dialog>
+
+<script>
+  type SearchEntry = { title: string; text: string; url: string; category: string }
+  const dialog = document.querySelector<HTMLDialogElement>('#site-search')
+  const input = document.querySelector<HTMLInputElement>('#site-search-input')
+  const results = document.querySelector<HTMLDivElement>('.search-results')
+  let entries: SearchEntry[] = []
+  let matches: SearchEntry[] = []
+  let selected = 0
+
+  async function loadEntries() {
+    if (entries.length) return
+    const response = await fetch('/search-index.json')
+    entries = await response.json()
+  }
+
+  function openSearch() {
+    if (!dialog || dialog.open) return
+    dialog.showModal()
+    input?.focus()
+    loadEntries().catch(() => {
+      if (results) results.innerHTML = '<p class="search-empty">搜索索引加载失败，请稍后重试。</p>'
+    })
+  }
+
+  function closeSearch() { dialog?.close() }
+
+  function selectResult(index: number) {
+    const links = results?.querySelectorAll<HTMLAnchorElement>('a')
+    if (!links?.length) return
+    selected = (index + links.length) % links.length
+    links.forEach((link, linkIndex) => link.classList.toggle('selected', linkIndex === selected))
+    links[selected].scrollIntoView({ block: 'nearest' })
+  }
+
+  function renderResults() {
+    if (!results || !input) return
+    const term = input.value.trim().toLowerCase().replace(/^#/, '')
+    results.replaceChildren()
+    if (!term) {
+      const hint = document.createElement('p')
+      hint.className = 'search-empty'
+      hint.textContent = '开始输入以搜索全站内容。'
+      results.append(hint)
+      matches = []
+      return
+    }
+
+    matches = entries
+      .map((entry) => {
+        const title = entry.title.toLowerCase()
+        const haystack = `${entry.title} ${entry.text} ${entry.url}`.toLowerCase()
+        let score = haystack.includes(term) ? 1 : 0
+        if (title.includes(term)) score += 4
+        if (title.startsWith(term)) score += 3
+        return { entry, score }
+      })
+      .filter((result) => result.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 12)
+      .map((result) => result.entry)
+
+    if (!matches.length) {
+      const empty = document.createElement('p')
+      empty.className = 'search-empty'
+      empty.textContent = `没有找到“${input.value.trim()}”相关内容。`
+      results.append(empty)
+      return
+    }
+
+    matches.forEach((entry) => {
+      const link = document.createElement('a')
+      link.href = entry.url
+      const category = document.createElement('span')
+      category.textContent = entry.category
+      const title = document.createElement('strong')
+      title.textContent = entry.title
+      const description = document.createElement('small')
+      description.textContent = entry.text
+      link.append(category, title, description)
+      link.addEventListener('click', closeSearch)
+      results.append(link)
+    })
+    selectResult(0)
+  }
+
+  document.querySelectorAll('[data-open-search]').forEach((button) => button.addEventListener('click', openSearch))
+  document.querySelector('[data-close-search]')?.addEventListener('click', closeSearch)
+  input?.addEventListener('input', renderResults)
+  input?.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') { event.preventDefault(); selectResult(selected + 1) }
+    if (event.key === 'ArrowUp') { event.preventDefault(); selectResult(selected - 1) }
+    if (event.key === 'Enter' && matches[selected]) {
+      event.preventDefault()
+      window.location.href = matches[selected].url
+    }
+  })
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog) closeSearch()
+  })
+  document.addEventListener('keydown', (event) => {
+    const target = event.target as HTMLElement
+    const typing = target.matches('input, textarea, select, [contenteditable="true"]')
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault()
+      dialog?.open ? closeSearch() : openSearch()
+    } else if (event.key === '/' && !typing) {
+      event.preventDefault()
+      openSearch()
+    }
+  })
+</script>
+
+<style>
+  dialog { width: min(100% - 32px, 680px); max-height: min(720px, calc(100vh - 80px)); overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: var(--surface-raised); padding: 0; color: var(--text); box-shadow: 0 28px 90px rgb(0 0 0 / .25); }
+  dialog::backdrop { background: rgb(18 22 25 / .55); backdrop-filter: blur(5px); }
+  .search-box { display: flex; max-height: inherit; flex-direction: column; }
+  .search-input-row { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); padding: 16px 18px; }
+  .search-input-row svg { width: 22px; height: 22px; flex: 0 0 auto; color: var(--muted); }
+  .search-input-row input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 17px; }
+  .search-input-row input::placeholder { color: var(--muted); }
+  .search-input-row button { border: 1px solid var(--line); border-radius: 6px; background: var(--surface-subtle); padding: 4px 7px; color: var(--muted); font-size: 11px; cursor: pointer; }
+  .search-hint { margin: 0; padding: 12px 18px 4px; color: var(--muted); font-size: 11px; }
+  .search-results { min-height: 220px; overflow-y: auto; padding: 10px; }
+  .search-results :global(a) { display: grid; grid-template-columns: 74px 1fr; gap: 2px 12px; border-radius: 10px; padding: 12px; color: var(--text); text-decoration: none; }
+  .search-results :global(a.selected) { background: var(--gold-soft); }
+  .search-results :global(a span) { grid-row: 1 / 3; align-self: center; color: var(--gold-strong); font-size: 11px; }
+  .search-results :global(a strong) { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+  .search-results :global(a small) { overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+  .search-results :global(.search-empty) { display: grid; min-height: 200px; place-items: center; margin: 0; color: var(--muted); font-size: 13px; text-align: center; }
+  .search-footer { display: flex; gap: 18px; border-top: 1px solid var(--line); padding: 10px 18px; color: var(--muted); font-size: 10px; }
+  .search-footer span:last-child { margin-left: auto; }
+  .search-footer kbd { margin-right: 3px; font-family: inherit; }
+  @media (max-width: 520px) {
+    dialog { max-height: calc(100vh - 32px); border-radius: 14px; }
+    .search-results :global(a) { grid-template-columns: 58px 1fr; gap: 2px 8px; }
+    .search-footer span:last-child { display: none; }
+  }
+</style>

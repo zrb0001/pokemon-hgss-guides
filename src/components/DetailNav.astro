@@ -1,0 +1,38 @@
+---
+interface Link {
+  href: string
+  label: string
+}
+
+interface Props {
+  previous?: Link
+  next?: Link
+  backHref: string
+  backLabel: string
+  label: string
+}
+
+const { previous, next, backHref, backLabel, label } = Astro.props
+---
+
+<nav class="detail-nav" aria-label={label}>
+  {previous ? <a class="previous" href={previous.href}><span>上一页</span><strong>← {previous.label}</strong></a> : <span />}
+  <a class="back-link" href={backHref}>{backLabel}</a>
+  {next ? <a class="next" href={next.href}><span>下一页</span><strong>{next.label} →</strong></a> : <span />}
+</nav>
+
+<style>
+  .detail-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; margin-top: 44px; border-top: 1px solid var(--line); padding-top: 24px; }
+  .detail-nav a { color: var(--text-secondary); font-size: 13px; text-decoration: none; }
+  .detail-nav a:not(.back-link) { display: flex; flex-direction: column; gap: 3px; }
+  .detail-nav a span { color: var(--muted); font-size: 10px; }
+  .detail-nav a strong { color: var(--text); font-weight: 600; }
+  .detail-nav a:hover strong, .back-link:hover { color: var(--gold-strong); }
+  .next { align-items: flex-end; text-align: right; }
+  .back-link { border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; white-space: nowrap; }
+  @media (max-width: 640px) {
+    .detail-nav { grid-template-columns: 1fr 1fr; }
+    .back-link { display: none; }
+    .detail-nav a strong { font-size: 12px; }
+  }
+</style>

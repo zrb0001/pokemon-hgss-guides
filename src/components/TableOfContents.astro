@@ -1,0 +1,50 @@
+---
+interface Heading {
+  depth: number
+  slug: string
+  text: string
+}
+
+interface Props {
+  headings: Heading[]
+  mobile?: boolean
+}
+
+const { headings, mobile = false } = Astro.props
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3)
+---
+
+{items.length > 0 && (mobile ? (
+  <details class="mobile-toc">
+    <summary>本页目录 <span>{items.length} 个章节</span></summary>
+    <nav aria-label="移动端本页目录">
+      {items.map((heading) => <a class={`depth-${heading.depth}`} href={`#${heading.slug}`}>{heading.text}</a>)}
+    </nav>
+  </details>
+) : (
+  <aside class="page-toc">
+    <p>本页目录</p>
+    <nav aria-label="本页目录">
+      {items.map((heading) => <a class={`depth-${heading.depth}`} href={`#${heading.slug}`}>{heading.text}</a>)}
+    </nav>
+  </aside>
+))}
+
+<style>
+  .page-toc { position: sticky; top: 104px; max-height: calc(100vh - 128px); overflow-y: auto; padding-left: 20px; scrollbar-width: thin; }
+  .page-toc > p { margin: 0 0 12px; color: var(--text); font-size: 12px; font-weight: 700; }
+  .page-toc nav { display: grid; gap: 2px; border-left: 1px solid var(--line); }
+  .page-toc a { border-left: 2px solid transparent; margin-left: -1px; padding: 5px 0 5px 14px; color: var(--muted); font-size: 12px; line-height: 1.55; text-decoration: none; }
+  .page-toc a.depth-3 { padding-left: 28px; font-size: 11px; }
+  .page-toc a:hover { border-color: var(--gold); color: var(--gold-strong); }
+  .mobile-toc { display: none; }
+  @media (max-width: 1240px) {
+    .page-toc { display: none; }
+    .mobile-toc { display: block; margin-bottom: 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); }
+    .mobile-toc summary { display: flex; justify-content: space-between; padding: 12px 14px; font-size: 13px; font-weight: 650; cursor: pointer; }
+    .mobile-toc summary span { color: var(--muted); font-size: 11px; font-weight: 400; }
+    .mobile-toc nav { display: grid; max-height: 320px; overflow-y: auto; border-top: 1px solid var(--line); padding: 10px 14px; }
+    .mobile-toc a { padding: 5px 0; color: var(--text-secondary); font-size: 12px; text-decoration: none; }
+    .mobile-toc a.depth-3 { padding-left: 16px; color: var(--muted); }
+  }
+</style>

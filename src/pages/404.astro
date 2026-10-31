@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="页面未找到">
+  <section class="not-found">
+    <img src="/images/pokemon/201.webp" alt="未知图腾" width="120" height="120" />
+    <p>ERROR 404 · LOST IN THE RUINS</p>
+    <h1>这条路似乎走不通</h1>
+    <span>你寻找的页面不存在，或者已经移动到别处。</span>
+    <div><a href="/">返回首页</a><a href="/guide/">查看流程攻略</a></div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found { display: flex; min-height: 52vh; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  img { image-rendering: pixelated; opacity: .65; }
+  .not-found > p { margin: 24px 0 10px; color: var(--gold-strong); font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: .15em; }
+  h1 { margin: 0; font-size: 34px; }
+  .not-found > span { margin-top: 12px; color: var(--muted); }
+  .not-found div { display: flex; gap: 12px; margin-top: 26px; }
+  .not-found a { border: 1px solid var(--line); border-radius: 8px; background: var(--surface-raised); padding: 9px 16px; color: var(--text); font-size: 13px; text-decoration: none; }
+  .not-found a:hover { border-color: var(--gold); color: var(--gold-strong); }
+</style>

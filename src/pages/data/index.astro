@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import PageHeader from '../../components/PageHeader.astro'
+import { pokedex, moveData, abilityData } from '../../utils/data'
+
+const resources = [
+  { title: '宝可梦图鉴', english: 'POKÉDEX', href: '/data/pokedex', count: pokedex.count, unit: '只宝可梦', description: '前 493 只宝可梦的名称、属性、特性、进化链、升级招式与第四世代能力值', image: '/images/pokemon/025.webp' },
+  { title: '招式资料', english: 'MOVE DATA', href: '/data/moves', count: moveData.count, unit: '个招式', description: '第四世代全部 467 个招式的数值、效果与学习机信息', image: null },
+  { title: '宝可梦特性列表', english: 'ABILITIES', href: '/guide/abilities', count: abilityData.count, unit: '个特性', description: '全部 123 个特性的中日英名称与效果说明', image: null }
+]
+---
+
+<BaseLayout title="数据资料总览" wide>
+  <PageHeader eyebrow="DATABASE · GENERATION IV" title="数据资料总览" description="所有资料均已保存到本站本地，可离线构建、快速查询。" />
+  <div class="resource-grid">
+    {resources.map((resource, index) => (
+      <a class="resource-card" href={resource.href}>
+        <span class="resource-index">0{index + 1}</span>
+        <p>{resource.english}</p>
+        <h2>{resource.title}</h2>
+        <div class="resource-count"><strong>{resource.count}</strong><span>{resource.unit}</span></div>
+        <span class="resource-description">{resource.description}</span>
+        <strong class="resource-link">进入资料库 <i>→</i></strong>
+        {resource.image && <img src={resource.image} alt="" aria-hidden="true" />}
+      </a>
+    ))}
+  </div>
+  <section class="data-intro prose">
+    <h2>资料索引</h2>
+    <ul>
+      <li><a href="/data/pokedex">宝可梦图鉴</a>：前 493 只宝可梦的名称、属性、特性、进化链、升级招式与第四世代能力值</li>
+      <li><a href="/data/moves">招式资料</a>：第四世代全部 467 个招式的数值、效果与学习机信息</li>
+      <li><a href="/guide/abilities">宝可梦特性列表</a>：全部 123 个特性的中日英名称与效果说明</li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .resource-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .resource-card { position: relative; display: flex; min-height: 330px; overflow: hidden; flex-direction: column; align-items: flex-start; border: 1px solid var(--line); border-radius: 16px; background: var(--surface-raised); padding: 28px; color: var(--text); text-decoration: none; transition: .2s; }
+  .resource-card:hover { border-color: var(--gold); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+  .resource-index { position: absolute; top: 24px; right: 24px; color: var(--muted); font-family: var(--font-display); font-size: 10px; }
+  .resource-card > p { margin: 0; color: var(--gold-strong); font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: .14em; }
+  .resource-card h2 { margin: 14px 0 18px; font-size: 22px; }
+  .resource-count { display: flex; align-items: baseline; gap: 8px; }
+  .resource-count strong { font-family: var(--font-display); font-size: 44px; font-weight: 650; line-height: 1; }
+  .resource-count span { color: var(--muted); font-size: 12px; }
+  .resource-description { max-width: 300px; margin-top: 18px; color: var(--text-secondary); font-size: 13px; line-height: 1.8; }
+  .resource-link { position: relative; z-index: 1; display: flex; gap: 14px; margin-top: auto; padding-top: 22px; color: var(--gold-strong); font-size: 12px; }
+  .resource-link i { font-style: normal; }
+  .resource-card img { position: absolute; right: -20px; bottom: -15px; width: 155px; height: 155px; object-fit: contain; image-rendering: pixelated; opacity: .18; }
+  .data-intro { max-width: 850px; margin-top: 48px; }
+  @media (max-width: 800px) { .resource-grid { grid-template-columns: 1fr; } .resource-card { min-height: 280px; } }
+</style>

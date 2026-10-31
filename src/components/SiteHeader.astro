@@ -1,0 +1,222 @@
+---
+import { mainNav, isCurrentPath } from '../utils/site'
+
+interface Props {
+  currentPath: string
+}
+
+const { currentPath } = Astro.props
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="心金·魂银攻略站首页">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="16" stroke="currentColor" stroke-width="2.5" />
+          <path d="M5 20h10m10 0h10" stroke="currentColor" stroke-width="2.5" />
+          <circle cx="20" cy="20" r="5" fill="var(--surface)" stroke="currentColor" stroke-width="2.5" />
+          <path d="M9 10a16 16 0 0 1 22 0" stroke="currentColor" stroke-width="5" stroke-linecap="round" />
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <strong>心金<span>·</span>魂银</strong>
+        <small>JOHTO FIELD GUIDE</small>
+      </span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="主导航">
+      {mainNav.map((item) => {
+        const active = item.href === '/data/'
+          ? currentPath === '/data/' || currentPath === '/data'
+          : isCurrentPath(currentPath, item.href)
+        return <a href={item.href} aria-current={active ? 'page' : undefined}>{item.label}</a>
+      })}
+    </nav>
+
+    <div class="header-actions">
+      <button class="search-trigger" type="button" data-open-search aria-label="搜索本站">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8" /><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+        <span>搜索</span>
+        <kbd>⌘ K</kbd>
+      </button>
+      <button class="icon-button theme-toggle" type="button" aria-label="切换深浅色主题" title="切换深浅色主题">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4m0-14.2-1.4 1.4M6.3 17.7l-1.4 1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 15.2A8.5 8.5 0 0 1 8.8 4 8.5 8.5 0 1 0 20 15.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" /></svg>
+      </button>
+      <details class="mobile-menu">
+        <summary class="icon-button" aria-label="打开导航菜单">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+        </summary>
+        <nav aria-label="移动端导航">
+          {mainNav.map((item) => <a href={item.href}>{item.label}</a>)}
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<script>
+  const themeButton = document.querySelector('.theme-toggle')
+  themeButton?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+    document.documentElement.dataset.theme = next
+    localStorage.setItem('hgss-theme', next)
+  })
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .header-inner {
+    display: flex;
+    width: min(100% - 48px, 1440px);
+    min-height: 72px;
+    align-items: center;
+    gap: 32px;
+    margin: 0 auto;
+  }
+
+  .brand {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 11px;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .brand-mark {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--gold-soft);
+    color: var(--gold-strong);
+  }
+
+  .brand-mark svg { width: 32px; height: 32px; }
+  .brand-copy { display: grid; gap: 1px; }
+  .brand-copy strong { font-size: 17px; letter-spacing: .08em; }
+  .brand-copy strong span { color: var(--gold); }
+  .brand-copy small { color: var(--muted); font-size: 8px; font-weight: 700; letter-spacing: .17em; }
+
+  .desktop-nav {
+    display: flex;
+    align-self: stretch;
+    gap: 26px;
+    margin-left: auto;
+  }
+
+  .desktop-nav a {
+    position: relative;
+    display: grid;
+    place-items: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .desktop-nav a::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: var(--gold);
+    content: '';
+    opacity: 0;
+    transform: scaleX(.4);
+    transition: .2s ease;
+  }
+
+  .desktop-nav a:hover,
+  .desktop-nav a[aria-current='page'] { color: var(--text); }
+  .desktop-nav a[aria-current='page']::after { opacity: 1; transform: scaleX(1); }
+
+  .header-actions { display: flex; align-items: center; gap: 8px; }
+
+  .search-trigger {
+    display: flex;
+    min-height: 38px;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-subtle);
+    padding: 0 9px 0 11px;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .search-trigger:hover { border-color: var(--line-strong); color: var(--text); }
+  .search-trigger svg { width: 17px; height: 17px; }
+  .search-trigger kbd { border: 1px solid var(--line); border-radius: 5px; background: var(--surface); padding: 2px 5px; font-family: inherit; font-size: 10px; }
+
+  .icon-button {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .icon-button:hover { background: var(--surface-subtle); color: var(--text); }
+  .icon-button svg { width: 20px; height: 20px; }
+  .moon-icon { display: none; }
+  :global([data-theme='dark']) .sun-icon { display: none; }
+  :global([data-theme='dark']) .moon-icon { display: block; }
+  .mobile-menu { display: none; position: relative; }
+  .mobile-menu summary { list-style: none; }
+  .mobile-menu summary::-webkit-details-marker { display: none; }
+  .mobile-menu nav {
+    position: absolute;
+    top: 46px;
+    right: 0;
+    display: grid;
+    width: 180px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-raised);
+    padding: 8px;
+    box-shadow: var(--shadow-lg);
+  }
+  .mobile-menu nav a { border-radius: 8px; padding: 11px 12px; color: var(--text); font-size: 14px; text-decoration: none; }
+  .mobile-menu nav a:hover { background: var(--surface-subtle); }
+
+  @media (max-width: 1100px) {
+    .desktop-nav { gap: 18px; }
+    .search-trigger kbd { display: none; }
+  }
+
+  @media (max-width: 900px) {
+    .desktop-nav { display: none; }
+    .header-actions { margin-left: auto; }
+    .mobile-menu { display: block; }
+  }
+
+  @media (max-width: 640px) {
+    .header-inner { width: min(100% - 28px, 1440px); min-height: 64px; gap: 12px; }
+    .brand-mark { width: 34px; height: 34px; }
+    .brand-copy strong { font-size: 15px; }
+    .brand-copy small { font-size: 7px; }
+    .search-trigger { width: 38px; justify-content: center; padding: 0; border-color: transparent; background: transparent; }
+    .search-trigger span { display: none; }
+  }
+</style>

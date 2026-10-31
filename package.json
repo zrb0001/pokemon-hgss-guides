@@ -1,0 +1,27 @@
+{
+  "name": "pokemon-hgss-guides",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "宝可梦 心金·魂银 中文攻略站",
+  "scripts": {
+    "docs:dev": "astro dev",
+    "docs:build": "astro build",
+    "docs:preview": "astro preview",
+    "docs:check": "astro check",
+    "pokedex:update": "node scripts/update-pokedex.mjs",
+    "moves:update": "node scripts/update-moves.mjs",
+    "abilities:update": "node scripts/update-abilities.mjs"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.5",
+    "mdast-util-to-string": "^4.0.0",
+    "remark-directive": "^4.0.0",
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "astro": "^7.4.6",
+    "typescript": "^5.9.3"
+  }
+}

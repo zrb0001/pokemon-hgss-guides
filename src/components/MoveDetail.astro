@@ -1,0 +1,155 @@
+---
+import { moveData, number, value } from '../utils/data'
+import type { Move } from '../utils/data'
+import TypeBadge from './TypeBadge.astro'
+import MoveClassBadge from './MoveClassBadge.astro'
+import DetailNav from './DetailNav.astro'
+
+interface Props {
+  entry: Move
+}
+
+const { entry } = Astro.props
+const hasAdditionalEffects = Boolean(entry.statChanges.length
+  || entry.meta.ailment.slug !== 'none'
+  || entry.meta.minHits !== null
+  || entry.meta.minTurns !== null
+  || entry.meta.drain !== 0
+  || entry.meta.healing !== 0
+  || entry.meta.critRate !== 0
+  || entry.meta.ailmentChance !== 0
+  || entry.meta.flinchChance !== 0
+  || entry.meta.statChance !== 0)
+const previous = entry.id > 1 ? moveData.moves[entry.id - 2] : undefined
+const next = entry.id < moveData.count ? moveData.moves[entry.id] : undefined
+---
+
+<article class="move-detail">
+  <div class="hero-panel">
+    <div class="move-identity">
+      <span class="move-number">MOVE DATA <strong>#{number(entry.id)}</strong></span>
+      <div class="move-tags">
+        <TypeBadge slug={entry.type.slug} name={entry.type.name} />
+        <MoveClassBadge slug={entry.damageClass.slug} name={entry.damageClass.name} />
+        {entry.machine && <span class="machine-tag">{entry.machine}</span>}
+      </div>
+      <p>{entry.target.name}</p>
+    </div>
+    <dl class="core-stats">
+      <div><dt>威力</dt><dd>{value(entry.power)}</dd></div>
+      <div><dt>命中</dt><dd>{value(entry.accuracy, '%')}</dd></div>
+      <div><dt>PP</dt><dd>{value(entry.pp)}</dd></div>
+      <div><dt>优先度</dt><dd>{entry.priority > 0 ? `+${entry.priority}` : entry.priority}</dd></div>
+    </dl>
+  </div>
+
+  <section>
+    <h2><span>01</span>基本资料</h2>
+    <div class="info-table-wrap">
+      <table class="info-table">
+        <tbody>
+          <tr><th>中文名</th><td>{entry.names.zh}</td><th>日文名</th><td>{entry.names.ja}</td></tr>
+          <tr><th>英文名</th><td>{entry.names.en}</td><th>引入世代</th><td>第 {entry.generation} 世代</td></tr>
+          <tr><th>属性</th><td>{entry.type.name}</td><th>分类</th><td><MoveClassBadge slug={entry.damageClass.slug} name={entry.damageClass.name} /></td></tr>
+          <tr><th>作用目标</th><td>{entry.target.name}</td><th>学习机</th><td>{entry.machine ?? '无'}</td></tr>
+          <tr><th>效果触发率</th><td>{value(entry.effectChance, '%')}</td><th>优先度</th><td>{entry.priority > 0 ? `+${entry.priority}` : entry.priority}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span>02</span>招式说明</h2>
+    <div class="description-panel">
+      <p class="zh-description">{entry.descriptions.zh}</p>
+      <p class="ja-description" lang="ja">{entry.descriptions.ja}</p>
+      <details><summary>《心金·魂银》英文游戏说明</summary><p lang="en">{entry.descriptions.hgss}</p></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span>03</span>效果说明</h2>
+    <div class="effect-panel" lang="en">
+      <p>{entry.effect.short}</p>
+      {entry.effect.full !== entry.effect.short && <p class="full-effect">{entry.effect.full}</p>}
+    </div>
+  </section>
+
+  {hasAdditionalEffects && (
+    <section>
+      <h2><span>04</span>战斗参数</h2>
+      <div class="parameters-grid">
+        {entry.meta.ailment.slug !== 'none' && <div><span>异常／状态</span><strong>{entry.meta.ailment.name}</strong></div>}
+        {entry.meta.ailmentChance > 0 && <div><span>状态触发率</span><strong>{entry.meta.ailmentChance}%</strong></div>}
+        {entry.meta.flinchChance > 0 && <div><span>畏缩率</span><strong>{entry.meta.flinchChance}%</strong></div>}
+        {entry.meta.statChance > 0 && <div><span>能力变化触发率</span><strong>{entry.meta.statChance}%</strong></div>}
+        {entry.meta.minHits !== null && <div><span>攻击次数</span><strong>{entry.meta.minHits === entry.meta.maxHits ? entry.meta.minHits : `${entry.meta.minHits}–${entry.meta.maxHits}`} 次</strong></div>}
+        {entry.meta.minTurns !== null && <div><span>持续回合</span><strong>{entry.meta.minTurns === entry.meta.maxTurns ? entry.meta.minTurns : `${entry.meta.minTurns}–${entry.meta.maxTurns}`} 回合</strong></div>}
+        {entry.meta.drain !== 0 && <div><span>伤害吸取</span><strong>{entry.meta.drain}%</strong></div>}
+        {entry.meta.healing !== 0 && <div><span>HP 回复</span><strong>{entry.meta.healing}%</strong></div>}
+        {entry.meta.critRate !== 0 && <div><span>击中要害</span><strong>等级 +{entry.meta.critRate}</strong></div>}
+      </div>
+      {entry.statChanges.length > 0 && (
+        <table class="stat-change-table">
+          <thead><tr><th>能力</th><th>变化等级</th></tr></thead>
+          <tbody>{entry.statChanges.map((stat) => <tr><td>{stat.name}</td><td>{stat.change > 0 ? `+${stat.change}` : stat.change}</td></tr>)}</tbody>
+        </table>
+      )}
+    </section>
+  )}
+
+  <DetailNav
+    label="相邻招式"
+    previous={previous ? { href: `/data/moves/${number(previous.id)}`, label: `#${number(previous.id)} ${previous.names.zh}` } : undefined}
+    next={next ? { href: `/data/moves/${number(next.id)}`, label: `#${number(next.id)} ${next.names.zh}` } : undefined}
+    backHref="/data/moves"
+    backLabel="返回招式列表"
+  />
+</article>
+
+<style>
+  .hero-panel { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(400px, 2fr); gap: 30px; align-items: center; margin: 26px 0 38px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(125deg, var(--surface-raised), var(--surface-subtle)); padding: 28px; }
+  .move-number { color: var(--muted); font-family: var(--font-display); font-size: 11px; font-weight: 650; letter-spacing: .12em; }
+  .move-number strong { margin-left: 6px; color: var(--gold-strong); font-size: 15px; }
+  .move-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  .machine-tag { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); padding: 3px 10px; color: var(--text-secondary); font-size: 11px; font-weight: 650; }
+  .move-identity > p { margin: 16px 0 0; color: var(--muted); font-size: 12px; }
+  .core-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 0; }
+  .core-stats div { border: 1px solid var(--line); border-radius: 11px; background: var(--surface); padding: 14px 10px; text-align: center; }
+  .core-stats dt { color: var(--muted); font-size: 11px; }
+  .core-stats dd { margin: 4px 0 0; font-family: var(--font-display); font-size: 25px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  section { margin-top: 38px; }
+  h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: 22px; letter-spacing: -.02em; }
+  h2 > span { color: var(--gold); font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: .1em; }
+  .info-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); }
+  .info-table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 13px; }
+  .info-table th, .info-table td { border-bottom: 1px solid var(--line); padding: 12px 15px; text-align: left; }
+  .info-table tr:last-child th, .info-table tr:last-child td { border-bottom: 0; }
+  .info-table th { width: 13%; background: var(--surface-subtle); color: var(--muted); font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .info-table td { width: 37%; color: var(--text-secondary); }
+  .description-panel, .effect-panel { border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); padding: 18px 20px; }
+  .description-panel p, .effect-panel p { margin: 0; white-space: pre-line; }
+  .zh-description { font-size: 15px; line-height: 1.85; }
+  .ja-description { margin-top: 8px !important; color: var(--muted); font-size: 13px; }
+  details { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; color: var(--muted); font-size: 12px; }
+  summary { cursor: pointer; }
+  details p { margin-top: 10px; }
+  .full-effect { margin-top: 8px !important; color: var(--muted); font-size: 13px; }
+  .parameters-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .parameters-grid div { display: flex; flex-direction: column; gap: 5px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-raised); padding: 13px 16px; }
+  .parameters-grid span { color: var(--muted); font-size: 11px; }
+  .parameters-grid strong { font-size: 14px; }
+  .stat-change-table { width: 100%; margin-top: 16px; border: 1px solid var(--line); border-collapse: collapse; border-radius: 10px; background: var(--surface-raised); font-size: 13px; }
+  .stat-change-table th, .stat-change-table td { border-bottom: 1px solid var(--line); padding: 10px 14px; text-align: left; }
+  .stat-change-table th { background: var(--surface-subtle); color: var(--muted); font-size: 11px; }
+  @media (max-width: 760px) {
+    .hero-panel { grid-template-columns: 1fr; gap: 22px; padding: 20px; }
+    .parameters-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 480px) {
+    .core-stats { grid-template-columns: repeat(2, 1fr); }
+    .info-table, .info-table tbody { display: block; width: 100%; min-width: 0; }
+    .info-table tr { display: grid; grid-template-columns: 78px minmax(0, 1fr); }
+    .info-table th, .info-table td { width: auto; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+  }
+</style>

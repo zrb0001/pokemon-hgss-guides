@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PokemonDetail from '../../../components/PokemonDetail.astro'
+import { pokedex, localizedName, number } from '../../../utils/data'
+import type { Pokemon } from '../../../utils/data'
+
+export function getStaticPaths() {
+  return pokedex.pokemon.map((entry) => ({
+    params: { id: number(entry.id) },
+    props: { entry }
+  }))
+}
+
+interface Props {
+  entry: Pokemon
+}
+
+const { entry } = Astro.props
+const title = localizedName(entry)
+---
+
+<BaseLayout wide title={title} description={`${entry.names.zh}的第四世代属性、特性、能力值、进化链、升级招式与心金·魂银获取方式。`}>
+  <div class="detail-container">
+    <nav class="breadcrumbs" aria-label="面包屑">
+      <a href="/data/">数据资料</a><span aria-hidden="true">/</span><a href="/data/pokedex">宝可梦图鉴</a><span aria-hidden="true">/</span><span>#{number(entry.id)}</span>
+    </nav>
+    <header class="detail-heading">
+      <p>POKÉDEX ENTRY · #{number(entry.id)}</p>
+      <h1>{title}</h1>
+    </header>
+    <PokemonDetail entry={entry} />
+  </div>
+</BaseLayout>
+
+<style>
+  .detail-container { max-width: 1000px; margin: 0 auto; }
+  .detail-heading { border-bottom: 1px solid var(--line); padding: 4px 0 24px; }
+  .detail-heading p { margin: 0 0 9px; color: var(--gold-strong); font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: .14em; }
+  .detail-heading h1 { margin: 0; font-size: clamp(25px, 3.5vw, 38px); font-weight: 750; letter-spacing: -.035em; line-height: 1.4; overflow-wrap: anywhere; }
+</style>
