@@ -1,6 +1,17 @@
 ---
 import { pokedex, number } from '../utils/data'
+import type { Pokemon } from '../utils/data'
 import TypeBadge from './TypeBadge.astro'
+
+function baseStatTotal(entry: Pokemon) {
+  return Object.values(entry.stats).reduce((total, stat) => total + stat, 0)
+}
+
+function statTier(total: number) {
+  if (total >= 500) return 'high'
+  if (total >= 400) return 'medium'
+  return 'low'
+}
 
 const typeOrder = ['normal', 'fire', 'water', 'grass', 'electric', 'ice', 'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel']
 const types = [...new Map(pokedex.pokemon.flatMap((entry) => entry.types).map((type) => [type.slug, type.name])).entries()]
@@ -42,6 +53,7 @@ const types = [...new Map(pokedex.pokemon.flatMap((entry) => entry.types).map((t
         data-search={`${entry.id} ${number(entry.id)} ${entry.slug} ${Object.values(entry.names).join(' ')}`.toLowerCase()}
       >
         <span class="card-number">#{number(entry.id)}</span>
+        <span class:list={['card-stats', `stat-${statTier(baseStatTotal(entry))}`]}>{baseStatTotal(entry)}</span>
         <span class="sprite-wrap">
           <img src={`/images/pokemon/${number(entry.id)}.webp`} alt={entry.names.zh} width="96" height="96" loading={entry.id <= 24 ? 'eager' : 'lazy'} decoding="async" />
         </span>
@@ -108,11 +120,15 @@ const types = [...new Map(pokedex.pokemon.flatMap((entry) => entry.types).map((t
   .pokemon-card { position: relative; display: flex; min-width: 0; overflow: hidden; flex-direction: column; align-items: center; border: 1px solid var(--line); border-radius: 13px; background: var(--surface-raised); padding: 18px 12px 15px; color: var(--text); text-align: center; text-decoration: none; box-shadow: var(--shadow-sm); transition: border-color .2s, box-shadow .2s, transform .2s; }
   .pokemon-card::after { position: absolute; right: -24px; bottom: -30px; width: 80px; height: 80px; border: 1px solid var(--line); border-radius: 50%; content: ''; opacity: .45; }
   .pokemon-card:hover { border-color: var(--gold); box-shadow: 0 8px 24px rgb(54 48 35 / .09); transform: translateY(-3px); }
-  .sprite-wrap { display: grid; width: 104px; height: 104px; place-items: center; margin-bottom: 7px; border-radius: 50%; background: radial-gradient(circle, var(--surface-subtle) 0 62%, transparent 63%); }
+  .sprite-wrap { display: grid; width: 104px; height: 104px; place-items: center; margin-bottom: 7px; }
   .pokemon-card img { width: 96px; height: 96px; object-fit: contain; image-rendering: pixelated; transition: transform .2s; }
   .pokemon-card:hover img { transform: scale(1.06); }
   .pokemon-card > strong { font-size: 15px; }
   .card-number { position: absolute; top: 10px; left: 12px; z-index: 1; color: var(--muted); font-family: var(--font-display); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .card-stats { position: absolute; top: 10px; right: 12px; font-family: var(--font-display); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card-stats.stat-high { color: #9256aa; }
+  .card-stats.stat-medium { color: #c54f45; }
+  .card-stats.stat-low { color: #c77b27; }
   .english-name { overflow: hidden; max-width: 100%; margin-top: 1px; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
   .card-types { position: relative; z-index: 1; display: flex; justify-content: center; gap: 5px; margin-top: 11px; }
   .empty-result { margin-top: 16px; }

@@ -30,7 +30,6 @@ export const guideTopics = [
   { title: '宝可梦特性列表', href: '/guide/abilities', description: '全部 123 个特性的中日英名称与效果说明' },
   { title: '宝可梦性格', href: '/guide/natures', description: '全部 25 种性格的能力修正、口味偏好、遗传与筛选方法' },
   { title: '所有精灵球介绍', href: '/guide/pokeballs', description: '全部 25 种球的第四世代捕获效果、获取方式与选择建议' },
-  { title: '隐藏要素', href: '/guide/hidden-features', description: '闪光树叶、GB Sounds、遗迹隐藏房间与特殊剧情' },
   { title: '星期家族', href: '/guide/week-siblings', description: '七人的出现星期、地点、属性道具与每周奖章' },
   { title: '所有交换 NPC 一览', href: '/guide/trades', description: '全部 10 组游戏内交换的地点、条件与携带道具' },
   { title: '所有可登记电话的人', href: '/guide/phone-contacts', description: '全部馆主、剧情人物与普通训练家的登记方式、再战时段和电话奖励' },
